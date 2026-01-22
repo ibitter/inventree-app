@@ -13,7 +13,7 @@ on:
 jobs:
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
   
     steps:
     - name: Checkout code
@@ -64,8 +64,4 @@ jobs:
         name: InvenTree
         path: build/app/outputs/flutter-apk/app-debug.apk
 
-    - name: Releasing using Hub
-      uses: sangatdesai/release-apk@main
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        APP_FOLDER: app
+
