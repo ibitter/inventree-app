@@ -63,3 +63,9 @@ jobs:
       with:
         name: InvenTree
         path: build/app/outputs/flutter-apk/app-release.apk
+
+    - name: Releasing using Hub
+      uses: sangatdesai/release-apk@main
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        APP_FOLDER: app
