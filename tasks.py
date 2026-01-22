@@ -42,3 +42,4 @@ def ios(c):
 def android(c):
     """Build Android app in release configuration."""
     c.run("fvm flutter build appbundle --release --no-tree-shake-icons")
+
