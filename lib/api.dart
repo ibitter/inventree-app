@@ -213,29 +213,26 @@ class InvenTreeAPI {
     return url;
   }
 
-  String _makeUrl(String url) {
-    // Strip leading slash
-    if (url.startsWith("/")) {
-      url = url.substring(1, url.length);
+  // Resolve a relative or absolute URL
+  String _makeUrl(String url, {String base = ""}) {
+    final baseUri = Uri.parse(base.isNotEmpty ? base : baseUrl);
+    final pathUri = Uri.parse(url);
+
+    // If path is absolute (has scheme), ignore base
+    if (pathUri.hasScheme) {
+      return pathUri.toString();
     }
 
-    // Prevent double-slash
-    url = url.replaceAll("//", "/");
-
-    return baseUrl + url;
+    return baseUri.resolveUri(pathUri).toString();
   }
-
-  String get apiUrl => _makeUrl("/api/");
-
-  String get imageUrl => _makeUrl("/image/");
 
   String makeApiUrl(String endpoint) {
-    if (endpoint.startsWith("/api/") || endpoint.startsWith("api/")) {
-      return _makeUrl(endpoint);
-    } else {
-      return _makeUrl("/api/${endpoint}");
-    }
+    String apiBase = makeUrl("/api/");
+
+    return _makeUrl(endpoint, base: apiBase);
   }
+
+  String get apiUrl => makeApiUrl("");
 
   String makeUrl(String endpoint) => _makeUrl(endpoint);
 
@@ -353,6 +350,9 @@ class InvenTreeAPI {
   // Supports separate search against "supplier" / "customer" / "manufacturer"
   bool get supportsSplitCompanySearch => apiVersion >= 315;
 
+  // Supports "requirements" information for specific part
+  bool get supportsPartRequirements => apiVersion >= 350;
+
   // Does the server support the "modern" (consolidated) parameter API?
   // Ref: https://github.com/inventree/InvenTree/pull/10699
   bool get supportsModernParameters => apiVersion >= 429;
@@ -410,7 +410,7 @@ class InvenTreeAPI {
    * 5. Request information on available plugins
    */
   Future<bool> _connectToServer() async {
-    if (!await _checkServer()) {
+    if (!await checkServer()) {
       return false;
     }
 
@@ -450,8 +450,8 @@ class InvenTreeAPI {
    * Check that the remote server is available.
    * Ping the api/ endpoint, which does not require user authentication
    */
-  Future<bool> _checkServer() async {
-    String address = profile?.server ?? "";
+  Future<bool> checkServer({String? server}) async {
+    String address = server ?? profile?.server ?? "";
 
     if (address.isEmpty) {
       showSnackIcon(
@@ -462,8 +462,10 @@ class InvenTreeAPI {
       return false;
     }
 
-    if (!address.endsWith("/")) {
-      address = address + "/";
+    String url = _makeUrl("/api/", base: address);
+
+    if (!url.endsWith("/")) {
+      url = url + "/";
     }
 
     // Cache the "strictHttps" setting, so we can use it later without async requirement
@@ -473,7 +475,7 @@ class InvenTreeAPI {
 
     debug("Connecting to ${apiUrl}");
 
-    APIResponse response = await get("", expectedStatusCode: 200);
+    APIResponse response = await get(url, expectedStatusCode: 200);
 
     if (!response.successful()) {
       debug("Server returned invalid response: ${response.statusCode}");
@@ -1140,7 +1142,7 @@ class InvenTreeAPI {
    * Perform a request to link a custom barcode to a particular item
    */
   Future<bool> linkBarcode(Map<String, String> body) async {
-    HttpClientRequest? request = await apiRequest("/barcode/link/", "POST");
+    HttpClientRequest? request = await apiRequest("barcode/link/", "POST");
 
     if (request == null) {
       return false;
@@ -1159,7 +1161,7 @@ class InvenTreeAPI {
    * Perform a request to unlink a custom barcode from a particular item
    */
   Future<bool> unlinkBarcode(Map<String, dynamic> body) async {
-    HttpClientRequest? request = await apiRequest("/barcode/unlink/", "POST");
+    HttpClientRequest? request = await apiRequest("barcode/unlink/", "POST");
 
     if (request == null) {
       return false;

@@ -1,9 +1,42 @@
-### x.xx.x - Month Year
+## 0.22.5 - March 2026
 ---
 
+- Fix default value for "cascade" filter in PartCategory list view
+- Fix default value for "cascade" filter in StockLocation list view
+
+## 0.22.4 - March 2026
+---
+
+- Adds button to check server connection
+- Fixes bug fetching sales order shipments
+- Fix for boolean fields in API forms
+
+## 0.22.3 - February 2026
+---
+
+- Auto-fill location data when receiving item via barcode scan
+- Visual improvements for boolean form fields
+- Add support for tri-state boolean form fields
+- Bug fixes for refreshing list view data
+
+## 0.22.2 - February 2026
+---
+
+- Bug fix for label printing, which used improperly formatted URL
+
+## 0.22.1 - February 2026
+---
+
+- Fixes bug related to fetching images from remote URLs
+
+### 0.22.0 - February 2026
+---
+
+- Display overall part requirements on part detail view
 - Support display of custom status codes
 - Fix default values for list sorting
-
+- Fix bug related to null values in list filters
+- Updated translations
 
 ### 0.21.2 - January 2026
 ---
